@@ -4,7 +4,7 @@
 ##	Login - a reusable Tk-widget	##
 ##		login screen		##
 ##					##
-##	Version 1.2			##
+##	Version 1.3			##
 ##					##
 ##	Brent B. Powers	(B2Pi)		##
 ##	Merrill Lynch			##
@@ -28,9 +28,13 @@ I<1.0> - Initial Implementation
 
 I<1.1> - Componentized for perl5.0021bh, handlers fixed
 
-I<1.2> - Set up for general distribution, added Version and VERSION.  Changed funky menu generation to Optionmenus.
+I<1.2> - Set up for general distribution, added Version and VERSION.
+Changed funky menu generation to Optionmenus.
 
-I<Todo:> - Subclass Optionmenu to dynamically set up the Server selections on post (or Buttondown?)
+I<1.3> - Added presentDBMenu and presentSrvMenu options.
+
+I<Todo:> - Subclass Optionmenu to dynamically set up the Server
+selections on post (or Buttondown?)
 
 =back
 
@@ -39,7 +43,7 @@ I<Todo:> - Subclass Optionmenu to dynamically set up the Server selections on po
 =head1 DESCRIPTION
 
 Login is a Widget that presents a dialog box to the user so that
-the user may enter his or her login name and password, as well as 
+the user may enter his or her login name and password, as well as
 select the appropriate database and server.
 
 =head1 USAGE
@@ -71,7 +75,7 @@ method, and then getting a valid login via the getVerification method.
  $Login->addDatabase('DB',	'SYBSRV1','SYB11');
  $Login->addDatabase('DBBACK',	'SYBSRV1','SYB11');
 
- $Login->configure(-User => $ENV{'USER'},
+ $Login->configure(-User => $ENV{USER},
 		   -ULabel => 'User Name:',
 		   -Title => 'Please Login');
 
@@ -127,7 +131,7 @@ displayed, and the user may press retry, or may press cancel, in which
 case control returns to the caller exactly as if the user had pressed
 cancel at the main login screen.
 
-When control returns to the caller, the return value will be 1 if the 
+When control returns to the caller, the return value will be 1 if the
 login was successful, or 0 if not.
 
 =head2 Notes
@@ -179,7 +183,7 @@ alters the servers.
 
 I<$Login->>I<clearDatabase([Database[, Database,...]]);>
 
-Clears the given Database entries, or all databases if 
+Clears the given Database entries, or all databases if
 if none are specified.
 
 =head2 Version
@@ -199,7 +203,7 @@ method, or retrieved via the cget method.
 
 =over 4
 
-=item 
+=item
 
 =head2 -User
 
@@ -300,7 +304,7 @@ Set or get the label for the Server Menu Button.  The default is 'Server:'.
 
 =over 4
 
-Set or get the font used for the labels.  The default is 
+Set or get the font used for the labels.  The default is
 '-Adobe-Courier-Bold-R-Normal--*-120-*'.
 
 =back
@@ -319,7 +323,7 @@ Set or get the Title for the Error Dialog. The default is
 =over 4
 
 Set or get the text displayed in the Error Dialog.  The default is
-'Unable to login to $db at $srv'.  $db will be interpreted as the 
+'Unable to login to $db at $srv'.  $db will be interpreted as the
 Database name, $srv will be interpreted as the Server name, $usr
 will be interpreted as the User name, and $pwd will be interpreted
 as the password.
@@ -344,13 +348,31 @@ default is 'Cancel'.
 
 =back
 
+=head2 -presentDBMenu
+
+=over 4
+
+If set False, do not display the database menu.  The database will be
+as configured, or default.  Default is True.
+
+=back
+
+=head2 -presentSrvMenu
+
+If set False, do not display the server menu.  The Server will be as
+configured, or default for the database. Default is True.
+
+=over 4
+
+=back
+
 =back
 
 =head1 Author
 
-B<Brent B. Powers, Merrill Lynch (B2Pi)>
+B<Brent B. Powers, B2Pi>
 
-powers@ml.com
+Currently on-site at Merrill Lynch, powers@ml.com
 
 This code may be distributed under the same conditions as perl itself.
 
@@ -371,7 +393,7 @@ use strict;
 @Sybase::Login::ISA = qw (Tk::Toplevel);
 Tk::Widget->Construct('Login');
 
-$Sybase::VERSION = '1.2';
+$Sybase::VERSION = 1.3;
 
 my(@topside) = (-side => 'top');
 my(@leftside) = (-side => 'left');
@@ -406,6 +428,8 @@ sub Populate {
 		       -Title =>	['PASSIVE', undef, undef, 'Database Login'],
 		       -Database =>	['METHOD', undef, undef, ''],
 		       -Server =>	['METHOD', undef, undef, ''],
+		       -presentDBMenu =>['PASSIVE', undef, undef, 1],
+		       -presentSrvMenu=>['PASSIVE', undef, undef, 1],
 		       -OKText =>	['PASSIVE', undef, undef, 'OK'],
 		       -CancelText =>	['PASSIVE', undef, undef, 'Cancel'],
 		       -ULabel =>	['PASSIVE', undef, undef, 'User:'],
@@ -413,7 +437,7 @@ sub Populate {
 		       -DLabel =>	['PASSIVE', undef, undef, 'Database:'],
 		       -SLabel =>	['PASSIVE', undef, undef, 'Server:'],
 		       -Labelfont =>	['PASSIVE', undef, undef,
-				     '-Adobe-Courier-Bold-R-Normal--*-120-*'],
+					 '-Adobe-Courier-Bold-R-Normal--*-120-*'],
 		       -EDlgTitle =>	['PASSIVE', undef, undef,
 					 'Database Login Error!'],
 		       -EDlgText =>	['PASSIVE', undef, undef,
@@ -447,7 +471,7 @@ sub addDatabase {
     }
 
     ### The user may either be modifying a current entry,
-    ### implicitly deleting a current entry, or 
+    ### implicitly deleting a current entry, or
     ### creating a new entry
     $self->{DBList}{$db} = \@srvlist;
 
@@ -468,7 +492,7 @@ sub addDatabase {
 }
 
 sub clearDatabase {
-#	Parameters:	([Database[, Database, ...]])
+    #	Parameters:	([Database[, Database, ...]])
 
     my($self) = shift;
     my($firstdeldb) = @_;
@@ -515,7 +539,7 @@ sub Server {
 }
 
 sub Database {
-#	Parameters:	(Database)
+    #	Parameters:	(Database)
     my ($self, $db) = @_;
 
     if (defined($db) and ($db ne '')) {
@@ -548,97 +572,91 @@ sub BuildBox {
     $self->{ULabel} = $tFrame->Label(@wanchor)
 	    ->pack(@leftside);
 
-    $self->{'userEntry'} =
-	    $tFrame->Entry(-textvariable => \$self->{Configure}{'-User'},
+    $self->{userEntry} =
+	    $tFrame->Entry(-textvariable => \$self->{Configure}{-User},
 			   @sunken)
 		    ->pack(@rightside, @expand, @xfill, @wanchor);
-    
+
     ############ Create the Password Frame #############
-    $tFrame = $self->Frame
+    $self->{PFrame} = $tFrame = $self->Frame
 	    ->pack(@topside, @xfill);
 
     $self->{PLabel} = $tFrame->Label(@wanchor)
 	    ->pack(@leftside);
 
-    $self->{'passEntry'} =
-	    $tFrame->Entry(-textvariable => \$self->{Configure}{'-Password'},
+    $self->{passEntry} =
+	    $tFrame->Entry(-textvariable => \$self->{Configure}{-Password},
 			   -show => '#',
 			   @sunken)
-	    ->pack(@rightside, @expand, @xfill, @wanchor);
-
-    ############ Create the Database  Frame #############
-    $self->{dbFrame} = $self->Frame
-	    ->pack(@topside, @xfill);
-
-    $self->{DLabel} = $self->{dbFrame}->Label(@wanchor)
-	    ->pack(@leftside);
-
-    ############ Create the Server  Frame #############
-    $self->{srvFrame} = $self->Frame
-	    ->pack(@topside, @xfill);
-
-    $self->{SLabel} = $self->{srvFrame}->Label(@wanchor)
-	    ->pack(@leftside);
+		    ->pack(@rightside, @expand, @xfill, @wanchor);
 
     ############ Create the Button Frame #############
     $tFrame = $self->Frame(@bw2)
 	    ->pack(@topside);
 
     $self->{OKButton} = $tFrame->Button(-command => sub {
-	$self->TestLogin($self);
-    })
+					    $self->TestLogin($self);
+					})
 	    ->pack(@leftside, @expand);
 
     $self->{OKButton}->bind('<Return>' => [sub {$self->{OKButton}->invoke}]);
 
     $self->{CancelButton} = $tFrame->Button(-command => sub {
-	$self->Exit(0);
-    })
+						$self->Exit(0);
+					    })
 	    ->pack(@leftside, @expand);
 
     $self->{CancelButton}->bind('<Return>' => sub {
-	$self->{CancelButton}->invoke});
+				    $self->{CancelButton}->invoke});
     $self->bind('<Escape>' => [sub {$self->{CancelButton}->invoke}]);
 
-    $self->{'passEntry'}->bind('<Return>'=> sub { $self->{OKButton}->focus; });
-    $self->{'passEntry'}->bind('<Control-u>' => sub {
-	$self->{Configure}{-Password} = '';
-    });
-    $self->{'userEntry'}->bind('<Control-u>' => sub {
-	$self->{Configure}{-User} = '';
-    });
-    $self->{'userEntry'}->bind('<Return>'=> sub {
-	\$self->{passEntry}->focus; } );
+    $self->{passEntry}->bind('<Return>'=> sub { $self->{OKButton}->focus; });
+    $self->{passEntry}->bind('<Control-u>' => sub {
+				 $self->{Configure}{-Password} = '';
+			       });
+    $self->{userEntry}->bind('<Control-u>' => sub {
+				   $self->{Configure}{-User} = '';
+			       });
+    $self->{userEntry}->bind('<Return>'=> sub {
+				   \$self->{passEntry}->focus; } );
 }
 
 sub getCurrentVerification {
-    my $self = shift;
+    my($self) = shift;
 
     ### The caller wants to find out if the current user, password
     ### database and server are OK.
-#   my ($rslt) = 
-	    &TestDatabase($self);
+    &TestDatabase($self);
+}
 
-#   return $rslt;
+sub CvtBool {
+    my($a) = shift;
+    return 1 if defined($a) && $a =~ m/[ytYT1]/;
+    return 0;
 }
 
 sub getVerification {
 
     my($self, $force, $forceval) = @_;
-    if (!defined($self->{'DBList'}) ||
+    if (!defined($self->{DBList}) ||
 	(keys %{$self->{DBList}}) == 0) {
 	carp "No Databases defined";
 	return 0;
     }
 
     if ((defined($force) &&
-	 defined($forceval) &&
-	 $forceval =~ m/[ytYT1]/ &&
+	 &CvtBool($forceval) &&
 	 lc($force) eq '-force') ||
 	!getCurrentVerification($self)) {
 
-	## OK, do it????
+	## OK, do it
 	$self->{Verified} = -1;
+
+	$self->{Configure}{-presentDBMenu} =
+		&CvtBool($self->{Configure}{-presentDBMenu});
+
+	$self->{Configure}{-presentSrvMenu} =
+		&CvtBool($self->{Configure}{-presentSrvMenu});
 
 	$self->title($self->{Configure}{-Title});
 	my($ParentState) = $self->parent->state;
@@ -652,27 +670,57 @@ sub getVerification {
 				   -font => $self->{Configure}{-Labelfont});
 	$self->{PLabel}->configure(-text => $self->{Configure}{-PLabel},
 				   -font => $self->{Configure}{-Labelfont});
-	$self->{DLabel}->configure(-text => $self->{Configure}{-DLabel},
-				   -font => $self->{Configure}{-Labelfont});
-	$self->{SLabel}->configure(-text => $self->{Configure}{-SLabel},
-				   -font => $self->{Configure}{-Labelfont});
+
+
+	############ Create the Database Frame, label, etc  #############
+	$self->{dbFrame}->destroy if defined($self->{dbFrame});
+	if ($self->{Configure}{-presentDBMenu}) {
+	    $self->{dbFrame} = $self->Frame
+		    ->pack(-after => $self->{PFrame}, @xfill);
+	    $self->{DLabel} = $self->{dbFrame}->Label(@wanchor)
+		    ->pack(@leftside);
+	    $self->{DLabel}->
+		    configure(-text => $self->{Configure}{-DLabel},
+			      -font => $self->{Configure}{-Labelfont});
+	}
+
+	############ Create the Server Frame, label, etc  #############
+	$self->{srvFrame}->destroy if defined($self->{srvFrame});
+	if ($self->{Configure}{-presentSrvMenu}) {
+	    my($f);
+	    $f = $self->{srvFrame} = $self->Frame;
+	    if ($self->{Configure}{-presentDBMenu}) {
+		$f->pack(-after => $self->{dbFrame}, @xfill)
+	    } else {
+		$f->pack(-after => $self->{PFrame}, @xfill)
+	    }
+
+	    $self->{SLabel} = $self->{srvFrame}->Label(@wanchor)
+		    ->pack(@leftside);
+	    $self->{SLabel}->
+		    configure(-text => $self->{Configure}{-SLabel},
+			      -font => $self->{Configure}{-Labelfont});
+	}
+
 	$self->update;
 
 	## Get the widest label...
 	my($maxWidth) = $self->{ULabel}->reqwidth;
 	my($max) = '-ULabel';
-	
+
 	if ($self->{PLabel}->reqwidth > $maxWidth) {
-	    $maxWidth = $self->{PLabel}->reqwidth;
+	    $max = $self->{PLabel}->reqwidth;
 	    $max = '-PLabel';
 	}
-	
-	if ($self->{DLabel}->reqwidth > $maxWidth) {
+
+	if ($self->{Configure}{-presentDBMenu} &&
+	    $self->{DLabel}->reqwidth > $maxWidth) {
 	    $maxWidth = $self->{DLabel}->reqwidth;
 	    $max = '-DLabel';
 	}
-	
-	if ($self->{SLabel}->reqwidth > $maxWidth) {
+
+	if ($self->{Configure}{-presentSrvMenu} &&
+	    $self->{SLabel}->reqwidth > $maxWidth) {
 	    $maxWidth = $self->{SLabel}->reqwidth;
 	    $max = '-SLabel';
 	}
@@ -680,9 +728,18 @@ sub getVerification {
 
 	$self->{ULabel}->configure(-width => $max);
 	$self->{PLabel}->configure(-width => $max);
-	$self->{DLabel}->configure(-width => $max);
-	$self->{SLabel}->configure(-width => $max);
+	$self->{DLabel}->configure(-width => $max)
+		if $self->{Configure}{-presentDBMenu};
+	$self->{SLabel}->configure(-width => $max)
+		if $self->{Configure}{-presentSrvMenu};
 	$self->update;
+
+	# Make sure that the Database is set
+	if (!defined($self->{Configure}{'-Database'}) ||
+	    ($self->{Configure}{'-Database'} eq '')) {
+	    $self->{Configure}{'-Database'} = (keys %{$self->{DBList}})[0];
+	    print "Set database to \"",(keys %{$self->{DBList}})[0],"\"\n";
+	}
 
 	## Set up the buttons
 	$self->{OKButton}->configure(-text =>
@@ -691,39 +748,37 @@ sub getVerification {
 					 $self->{Configure}{-CancelText});
 
 	$self->{databaseMB}->destroy if defined($self->{databaseMB});
-	$self->{databaseMB} = $self->{dbFrame}->
-		Optionmenu(-textvariable =>\$self->{Configure}{'-Database'},
-			   -command => sub {
-			       &CreateSrvMenu($self);
-			   },
-			   @raised)
-			->pack(@rightside, @eanchor, @expand, @xfill);
+	if ($self->{Configure}{-presentDBMenu}) {
+	    $self->{databaseMB} = $self->{dbFrame}->Optionmenu
+		    (-textvariable => \$self->{Configure}{'-Database'},
+		     -command => sub {
+			 &CreateSrvMenu($self);
+		     },
+		     @raised)
+			    ->pack(@rightside, @eanchor, @expand, @xfill);
 
-	my(@opts);
-	foreach (sort keys(%{$self->{DBList}})) {
-	    push(@opts,$_);
-	}
+	    my(@opts);
+	    foreach (sort keys(%{$self->{DBList}})) {
+		push(@opts,$_);
+	    }
 
-	$self->{databaseMB}->configure(-options => [@opts]);
-	# Make sure that the Database is set
-	if (!defined($self->{Configure}{'-Database'}) ||
-	    ($self->{Configure}{'-Database'} eq '')) {
-	    $self->{Configure}{'-Database'} = (keys %{$self->{DBList}})[0];
+	    $self->{databaseMB}->configure(-options => [@opts]);
+
+	    $self->{databaseMB}->configure(-state => 'disabled') if 1 == @opts;
 	}
 
 	&CreateSrvMenu($self);
 
-	$self->{databaseMB}->configure(-state => 'disabled') if 1 == @opts;
 
         # Set the focus to the user if it hasn't been set, or
         # to the password frame
         my ($oldFocus) = $self->focusCurrent;
         if ($self->{Configure}{-User} eq "") {
-            $self->{'userEntry'}->focus;
+            $self->{userEntry}->focusForce;
         } else {
-            $self->{'passEntry'}->focus;
+            $self->{passEntry}->focusForce;
         }
- 
+
 	# Take care of the window position
 	my($x) = int(($self->screenwidth - $self->reqwidth)/2)
 		- $self->parent->vrootx;
@@ -758,8 +813,13 @@ sub getVerification {
 
 sub CreateSrvMenu {
     my($self) = @_;
-    
+
     $self->{serverMB}->destroy if (defined($self->{serverMB}));
+
+    $self->{Configure}{'-Server'} =
+	    $self->{DBList}{$self->{Configure}{'-Database'}}[0];
+
+    return if !$self->{Configure}{-presentSrvMenu};
 
     my(@opts);
     foreach (@{$self->{DBList}{$self->{Configure}{'-Database'}}}) {
@@ -839,8 +899,8 @@ sub TestLogin {
     } else {
 	my($db) = $self->{Configure}{'-Database'};
 	my($srv) = $self->{Configure}{'-Server'};
-	my($usr) = $self->{Configure}{'-User'};
-	my($pwd) = $self->{Configure}{'-Password'};
+	my($usr) = $self->{Configure}{-User};
+	my($pwd) = $self->{Configure}{-Password};
 
 	eval "\$db = \"$self->{Configure}{-EDlgText}\"";
 
@@ -851,7 +911,7 @@ sub TestLogin {
 			  -justify => 'center',
 			  -buttons => [$self->{Configure}{-EDlgRetry},
 				       $self->{Configure}{-EDlgCancel}])
-		->Show eq $self->{Configure}{-EDlgCancel}) {
+	    ->Show eq $self->{Configure}{-EDlgCancel}) {
 	    $self->Exit(0);
 	}
     }
