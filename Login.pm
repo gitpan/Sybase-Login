@@ -4,7 +4,7 @@
 ##	Login - a reusable Tk-widget	##
 ##		login screen		##
 ##					##
-##	Version 1.3			##
+##	Version 1.4			##
 ##					##
 ##	Brent B. Powers	(B2Pi)		##
 ##	Merrill Lynch			##
@@ -32,6 +32,8 @@ I<1.2> - Set up for general distribution, added Version and VERSION.
 Changed funky menu generation to Optionmenus.
 
 I<1.3> - Added presentDBMenu and presentSrvMenu options.
+
+I<1.4> - OK, so I had troubles with PAUSE on 1.3
 
 I<Todo:> - Subclass Optionmenu to dynamically set up the Server
 selections on post (or Buttondown?)
@@ -393,7 +395,7 @@ use strict;
 @Sybase::Login::ISA = qw (Tk::Toplevel);
 Tk::Widget->Construct('Login');
 
-$Sybase::VERSION = 1.3;
+$Sybase::VERSION = 1.4;
 
 my(@topside) = (-side => 'top');
 my(@leftside) = (-side => 'left');
